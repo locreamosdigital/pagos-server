@@ -6,8 +6,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-/* 🔐 ACCESS TOKEN */
-const ACCESS_TOKEN = "APP_USR-3840784826968925-042810-481f06ae904d7cb715b21f6b95b7c19a-3365977450";
+/* 🔐 ACCESS TOKEN (luego lo moveremos a variable de entorno) */
+const ACCESS_TOKEN = "APP_USR-XXXXXXXXXXXX";
 
 /* 🚀 CREAR LINK DE PAGO */
 app.post("/crear-pago", async (req, res) => {
@@ -31,16 +31,22 @@ app.post("/crear-pago", async (req, res) => {
           currency_id: "CLP"
         }
       ],
+
+      // 🔥 IDENTIFICADOR DEL PEDIDO
+      external_reference: `${nombre || "Cliente"}-${Date.now()}`,
+
       payer: {
         name: nombre || "Cliente",
         email: "test_user@test.com"
       },
-     back_urls: {
-  success: "https://locreamosdigital.cl/pago-exitoso",
-  failure: "https://locreamosdigital.cl/muestrapedidoscomida",
-  pending: "https://locreamosdigital.cl/muestrapedidoscomida"
-},
-auto_return: "approved"
+
+      back_urls: {
+        success: "https://locreamosdigital.cl/pago-exitoso",
+        failure: "https://locreamosdigital.cl/muestrapedidoscomida",
+        pending: "https://locreamosdigital.cl/muestrapedidoscomida"
+      },
+
+      auto_return: "approved"
     };
 
     console.log("📡 Enviando a MercadoPago...");
@@ -72,6 +78,18 @@ auto_return: "approved"
       error: "Error real desde servidor"
     });
   }
+});
+
+/* 🧪 WEBHOOK (PARA FUTURO USO) */
+app.post("/webhook", (req, res) => {
+  console.log("📩 Notificación de MercadoPago:", req.body);
+
+  // Aquí luego podrás:
+  // - validar pago aprobado
+  // - enviar WhatsApp automático
+  // - guardar pedidos
+
+  res.sendStatus(200);
 });
 
 /* TEST */
