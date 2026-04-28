@@ -35,12 +35,12 @@ app.post("/crear-pago", async (req, res) => {
         name: nombre || "Cliente",
         email: "test_user@test.com"
       },
-      back_urls: {
-        success: "https://locreamosdigital.cl/gracias",
-        failure: "https://locreamosdigital.cl/error",
-        pending: "https://locreamosdigital.cl/pendiente"
-      },
-      auto_return: "approved"
+     back_urls: {
+  success: "https://locreamosdigital.cl/pago-exitoso",
+  failure: "https://locreamosdigital.cl/muestrapedidoscomida",
+  pending: "https://locreamosdigital.cl/muestrapedidoscomida"
+},
+auto_return: "approved"
     };
 
     console.log("📡 Enviando a MercadoPago...");
