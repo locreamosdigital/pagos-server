@@ -7,7 +7,7 @@ app.use(cors());
 app.use(express.json());
 
 /* 🔐 ACCESS TOKEN (luego lo moveremos a variable de entorno) */
-const ACCESS_TOKEN = "APP_USR-XXXXXXXXXXXX";
+const ACCESS_TOKEN = "APP_USR-3840784826968925-042810-481f06ae904d7cb715b21f6b95b7c19a-3365977450";
 
 /* 🚀 CREAR LINK DE PAGO */
 app.post("/crear-pago", async (req, res) => {
