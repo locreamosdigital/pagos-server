@@ -1,13 +1,12 @@
 const express = require("express");
 const cors = require("cors");
 const axios = require("axios");
-
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-/* 🔐 ACCESS TOKEN */
-const ACCESS_TOKEN = "TU_TOKEN";
+/* 🔐 ACCESS TOKEN (luego lo moveremos a variable de entorno) */
+const ACCESS_TOKEN = "APP_USR-3840784826968925-042810-481f06ae904d7cb715b21f6b95b7c19a-3365977450";
 
 /* 🚀 CREAR LINK DE PAGO */
 app.post("/crear-pago", async (req, res) => {
@@ -16,11 +15,7 @@ app.post("/crear-pago", async (req, res) => {
 
     const { total, nombre } = req.body;
 
-    console.log(
-      "💰 Datos recibidos:",
-      total,
-      nombre
-    );
+    console.log("💰 Datos recibidos:", total, nombre);
 
     if (!total) {
 
@@ -41,8 +36,8 @@ app.post("/crear-pago", async (req, res) => {
         }
       ],
 
-      external_reference:
-        `${nombre || "Cliente"}-${Date.now()}`,
+      // 🔥 IDENTIFICADOR DEL PEDIDO
+      external_reference: `${nombre || "Cliente"}-${Date.now()}`,
 
       payer: {
         name: nombre || "Cliente",
@@ -50,50 +45,31 @@ app.post("/crear-pago", async (req, res) => {
       },
 
       back_urls: {
-
-        success:
-          "https://locreamosdigital.cl/pago-exitoso",
-
-        failure:
-          "https://locreamosdigital.cl/muestrapedidoscomida",
-
-        pending:
-          "https://locreamosdigital.cl/muestrapedidoscomida"
-
+        success: "https://locreamosdigital.cl/pago-exitoso",
+        failure: "https://locreamosdigital.cl/muestrapedidoscomida",
+        pending: "https://locreamosdigital.cl/muestrapedidoscomida"
       },
 
       auto_return: "approved"
 
     };
 
-    console.log(
-      "📡 Enviando a MercadoPago..."
-    );
+    console.log("📡 Enviando a MercadoPago...");
 
     const response = await axios.post(
-
       "https://api.mercadopago.com/checkout/preferences",
-
       paymentData,
-
       {
         headers: {
-          Authorization:
-            `Bearer ${ACCESS_TOKEN}`,
-
-          "Content-Type":
-            "application/json"
+          Authorization: `Bearer ${ACCESS_TOKEN}`,
+          "Content-Type": "application/json"
         }
       }
-
     );
 
     const data = response.data;
 
-    console.log(
-      "✅ Link generado:",
-      data.init_point
-    );
+    console.log("✅ Link generado:", data.init_point);
 
     return res.json({
       url: data.init_point
@@ -102,28 +78,25 @@ app.post("/crear-pago", async (req, res) => {
   } catch (error) {
 
     console.log("❌ ERROR MP:");
-
-    console.log(
-      error.response?.data ||
-      error.message
-    );
+    console.log(error.response?.data || error.message);
 
     return res.status(500).json({
-      error:
-        "Error real desde servidor"
+      error: "Error real desde servidor"
     });
 
   }
 
 });
 
-/* 🧪 WEBHOOK */
+/* 🧪 WEBHOOK (PARA FUTURO USO) */
 app.post("/webhook", (req, res) => {
 
-  console.log(
-    "📩 Notificación de MercadoPago:",
-    req.body
-  );
+  console.log("📩 Notificación de MercadoPago:", req.body);
+
+  // Aquí luego podrás:
+  // - validar pago aprobado
+  // - enviar WhatsApp automático
+  // - guardar pedidos
 
   res.sendStatus(200);
 
@@ -131,19 +104,16 @@ app.post("/webhook", (req, res) => {
 
 /* TEST */
 app.get("/", (req, res) => {
-  res.send(
-    "Servidor MercadoPago activo ✅"
-  );
+
+  res.send("Servidor MercadoPago activo ✅");
+
 });
 
-/* 🚀 PUERTO */
-const PORT =
-  process.env.PORT || 3001;
+/* 🚀 PUERTO CORRECTO PARA RENDER */
+const PORT = process.env.PORT || 3001;
 
 app.listen(PORT, () => {
 
-  console.log(
-    `🔥 Servidor corriendo en puerto ${PORT}`
-  );
+  console.log(`🔥 Servidor corriendo en puerto ${PORT}`);
 
 });
