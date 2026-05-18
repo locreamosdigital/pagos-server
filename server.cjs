@@ -92,6 +92,56 @@ app.post("/webhook", (req, res) => {
   res.sendStatus(200);
 });
 
+/* 🚀 GUARDAR PEDIDO */
+app.post("/guardar-pedido", async (req, res) => {
+
+  try {
+
+    // ✅ RESPONDER INMEDIATO
+    res.json({
+      ok: true
+    });
+
+    // 🔥 DATOS DEL PEDIDO
+    const pedido = req.body;
+
+    console.log("📦 Pedido recibido");
+
+    // 🔥 URL APPS SCRIPT
+    const APPS_SCRIPT_URL =
+      "https://script.google.com/macros/s/AKfycbwXkgHFQKPGgVHFRavqTlQ_8h3H6MT84ndH2feNSccGZwfw5YaBvj5EbyGNDEe875Tw/exec";
+
+    // 🚀 ENVIAR A GOOGLE SHEETS
+    await axios.post(
+      APPS_SCRIPT_URL,
+      pedido,
+      {
+        headers: {
+          "Content-Type":
+            "application/json"
+        }
+      }
+    );
+
+    console.log(
+      "✅ Pedido enviado a Google Sheets"
+    );
+
+  } catch (error) {
+
+    console.log(
+      "❌ Error guardando pedido:"
+    );
+
+    console.log(
+      error.response?.data ||
+      error.message
+    );
+
+  }
+
+});
+
 /* TEST */
 app.get("/", (req, res) => {
   res.send("Servidor MercadoPago activo ✅");
