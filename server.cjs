@@ -113,15 +113,17 @@ app.post("/guardar-pedido", async (req, res) => {
 
     // 🚀 ENVIAR A GOOGLE SHEETS
     await axios.post(
-      APPS_SCRIPT_URL,
-      pedido,
-      {
-        headers: {
-          "Content-Type":
-            "application/json"
-        }
-      }
-    );
+  APPS_SCRIPT_URL,
+
+  JSON.stringify(pedido),
+
+  {
+    headers: {
+      "Content-Type":
+        "text/plain;charset=utf-8"
+    }
+  }
+);
 
     console.log(
       "✅ Pedido enviado a Google Sheets"
