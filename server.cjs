@@ -3,22 +3,20 @@ const cors = require("cors");
 const axios = require("axios");
 
 const app = express();
+
 app.use(cors());
 app.use(express.json());
 
-/* 🔐 ACCESS TOKEN */
-const ACCESS_TOKEN = "TU_TOKEN";
+/* 🔐 ACCESS TOKEN (luego lo moveremos a variable de entorno) */
+const ACCESS_TOKEN =
+  "APP_USR-3840784826968925-042810-481f06ae904d7cb715b21f6b95b7c19a-3365977450";
 
 /* 🚀 CREAR LINK DE PAGO */
 app.post("/crear-pago", async (req, res) => {
 
   try {
 
-    const {
-  total,
-  nombre,
-  whatsapp
-} = req.body;
+    const { total, nombre } = req.body;
 
     console.log(
       "💰 Datos recibidos:",
@@ -45,6 +43,7 @@ app.post("/crear-pago", async (req, res) => {
         }
       ],
 
+      // 🔥 IDENTIFICADOR DEL PEDIDO
       external_reference:
         `${nombre || "Cliente"}-${Date.now()}`,
 
@@ -56,7 +55,7 @@ app.post("/crear-pago", async (req, res) => {
       back_urls: {
 
         success:
-          `https://locreamosdigital.cl/pago-exitoso?msg=${whatsapp}`,
+          "https://locreamosdigital.cl/pago-exitoso",
 
         failure:
           "https://locreamosdigital.cl/muestrapedidoscomida",
@@ -82,11 +81,13 @@ app.post("/crear-pago", async (req, res) => {
 
       {
         headers: {
+
           Authorization:
             `Bearer ${ACCESS_TOKEN}`,
 
           "Content-Type":
             "application/json"
+
         }
       }
 
@@ -121,7 +122,7 @@ app.post("/crear-pago", async (req, res) => {
 
 });
 
-/* 🧪 WEBHOOK */
+/* 🧪 WEBHOOK (PARA FUTURO USO) */
 app.post("/webhook", (req, res) => {
 
   console.log(
@@ -129,18 +130,25 @@ app.post("/webhook", (req, res) => {
     req.body
   );
 
+  // Aquí luego podrás:
+  // - validar pago aprobado
+  // - enviar WhatsApp automático
+  // - guardar pedidos
+
   res.sendStatus(200);
 
 });
 
 /* TEST */
 app.get("/", (req, res) => {
+
   res.send(
     "Servidor MercadoPago activo ✅"
   );
+
 });
 
-/* 🚀 PUERTO */
+/* 🚀 PUERTO CORRECTO PARA RENDER */
 const PORT =
   process.env.PORT || 3001;
 
