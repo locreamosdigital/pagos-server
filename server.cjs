@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const axios = require("axios");
 const crypto = require("crypto");
+const qs = require("querystring");
 
 const app = express();
 
@@ -15,7 +16,9 @@ const FLOW_API_KEY =
 const FLOW_SECRET_KEY =
   "371692b7b22234b0172022206b744e5731c66c6e";
 
-/* 🚀 CREAR LINK DE PAGO FLOW */
+/* =======================================
+   🚀 CREAR LINK DE PAGO FLOW
+======================================= */
 app.post("/crear-pago", async (req, res) => {
 
   try {
@@ -28,6 +31,7 @@ app.post("/crear-pago", async (req, res) => {
       nombre
     );
 
+    /* 🔥 VALIDAR TOTAL */
     if (!total) {
 
       return res.status(400).json({
@@ -36,10 +40,13 @@ app.post("/crear-pago", async (req, res) => {
 
     }
 
-    /* 📦 DATOS DEL PAGO */
+    /* =======================================
+       📦 PARAMETROS FLOW
+    ======================================= */
     const params = {
 
-      apiKey: FLOW_API_KEY,
+      apiKey:
+        FLOW_API_KEY,
 
       commerceOrder:
         `PEDIDO-${Date.now()}`,
@@ -56,17 +63,20 @@ app.post("/crear-pago", async (req, res) => {
       email:
         "contactanos@locreamosdigital.cl",
 
-      // 🔥 URL CUANDO FLOW CONFIRMA EL PAGO
+      /* 🔥 WEBHOOK */
       urlConfirmation:
-        "https://locreamosdigital.cl/webhook",
+        "https://pagos-server.onrender.com/webhook",
 
-      // 🔥 URL DONDE REGRESA EL CLIENTE
+      /* 🔥 RETORNO CLIENTE */
       urlReturn:
         "https://locreamosdigital.cl/pagoExitoso"
 
     };
 
-    /* 🔐 ORDENAR PARAMETROS */
+    /* =======================================
+       🔐 GENERAR FIRMA FLOW
+    ======================================= */
+
     const keys =
       Object.keys(params).sort();
 
@@ -79,7 +89,6 @@ app.post("/crear-pago", async (req, res) => {
 
     });
 
-    /* 🔥 FIRMA FLOW */
     const signature =
       crypto
         .createHmac(
@@ -92,19 +101,31 @@ app.post("/crear-pago", async (req, res) => {
     params.s = signature;
 
     console.log(
+      "🔐 Firma generada correctamente"
+    );
+
+    console.log(
       "📡 Enviando a Flow..."
     );
 
-    /* 🚀 CREAR PAGO */
+    /* =======================================
+       🚀 CREAR PAGO FLOW
+    ======================================= */
+
     const response =
       await axios.post(
 
-        "https://www.flow.cl/api/payment/create",
+        "https://sandbox.flow.cl/api/payment/create",
 
-        null,
+        qs.stringify(params),
 
         {
-          params
+          headers: {
+
+            "Content-Type":
+              "application/x-www-form-urlencoded"
+
+          }
         }
 
       );
@@ -113,19 +134,54 @@ app.post("/crear-pago", async (req, res) => {
       response.data;
 
     console.log(
-      "✅ Link generado:",
-      data.url +
-      "?token=" +
-      data.token
+      "✅ FLOW RESPONSE:"
     );
 
-    /* 🔥 URL FINAL */
+    console.log(data);
+
+    /* =======================================
+       🔥 VALIDAR RESPUESTA FLOW
+    ======================================= */
+
+    if (
+      !data.url ||
+      !data.token
+    ) {
+
+      console.log(
+        "❌ Flow no devolvió URL válida"
+      );
+
+      return res.status(500).json({
+
+        error:
+          "Flow no devolvió URL válida",
+
+        flowResponse:
+          data
+
+      });
+
+    }
+
+    /* =======================================
+       🔥 URL FINAL FLOW
+    ======================================= */
+
+    const urlPago =
+
+      data.url +
+      "?token=" +
+      data.token;
+
+    console.log(
+      "🚀 URL FINAL:",
+      urlPago
+    );
+
     return res.json({
 
-      url:
-        data.url +
-        "?token=" +
-        data.token
+      url: urlPago
 
     });
 
@@ -136,14 +192,21 @@ app.post("/crear-pago", async (req, res) => {
     );
 
     console.log(
-      error.response?.data ||
+      error.response?.data
+    );
+
+    console.log(
       error.message
     );
 
     return res.status(500).json({
 
       error:
-        "Error real desde servidor"
+        "Error real desde servidor",
+
+      detalle:
+        error.response?.data ||
+        error.message
 
     });
 
@@ -151,25 +214,30 @@ app.post("/crear-pago", async (req, res) => {
 
 });
 
-/* 🧪 WEBHOOK FLOW */
+/* =======================================
+   🧪 WEBHOOK FLOW
+======================================= */
 app.post("/webhook", (req, res) => {
 
   console.log(
-    "📩 Confirmación Flow:",
-    req.body
+    "📩 Confirmación Flow:"
   );
 
-  // Aquí luego podrás:
+  console.log(req.body);
+
+  // 🔥 AQUÍ LUEGO:
   // - validar pago aprobado
   // - guardar pedido
+  // - enviar whatsapp
   // - imprimir cocina
-  // - enviar WhatsApp
 
   res.sendStatus(200);
 
 });
 
-/* TEST */
+/* =======================================
+   🧪 TEST
+======================================= */
 app.get("/", (req, res) => {
 
   res.send(
@@ -178,7 +246,9 @@ app.get("/", (req, res) => {
 
 });
 
-/* 🚀 PUERTO */
+/* =======================================
+   🚀 PUERTO
+======================================= */
 const PORT =
   process.env.PORT || 3001;
 
