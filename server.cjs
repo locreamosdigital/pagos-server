@@ -115,7 +115,7 @@ app.post("/crear-pago", async (req, res) => {
     const response =
       await axios.post(
 
-        "https://sandbox.flow.cl/api/payment/create",
+        "https://www.flow.cl/api/payment/create",
 
         qs.stringify(params),
 
