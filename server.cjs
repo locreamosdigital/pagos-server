@@ -1,17 +1,21 @@
 const express = require("express");
 const cors = require("cors");
 const axios = require("axios");
+const crypto = require("crypto");
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
-/* 🔐 ACCESS TOKEN (luego lo moveremos a variable de entorno) */
-const ACCESS_TOKEN =
-  "APP_USR-2854404680501961-042810-8febe35dc858b73d27aa2f2246bb5087-294479764";
+/* 🔐 CREDENCIALES FLOW */
+const FLOW_API_KEY =
+  "5A3C4FB1-B261-4308-B1C6-7D330D1L5B49";
 
-/* 🚀 CREAR LINK DE PAGO */
+const FLOW_SECRET_KEY =
+  "371692b7b22234b0172022206b744e5731c66c6e";
+
+/* 🚀 CREAR LINK DE PAGO FLOW */
 app.post("/crear-pago", async (req, res) => {
 
   try {
@@ -32,81 +36,104 @@ app.post("/crear-pago", async (req, res) => {
 
     }
 
-    const paymentData = {
+    /* 📦 DATOS DEL PAGO */
+    const params = {
 
-      items: [
-        {
-          title: "Pedido Sushi",
-          quantity: 1,
-          unit_price: Number(total),
-          currency_id: "CLP"
-        }
-      ],
+      apiKey: FLOW_API_KEY,
 
-      // 🔥 IDENTIFICADOR DEL PEDIDO
-      external_reference:
-        `${nombre || "Cliente"}-${Date.now()}`,
+      commerceOrder:
+        `PEDIDO-${Date.now()}`,
 
-      payer: {
-        name: nombre || "Cliente",
-        email: "test_user@test.com"
-      },
+      subject:
+        "Pedido Sushi",
 
-      back_urls: {
+      currency:
+        "CLP",
 
-        success:
-          "https://locreamosdigital.cl/PagoExitoso.jsx",
+      amount:
+        Number(total),
 
-        failure:
-          "https://locreamosdigital.cl/MenuPagoTarjeta",
+      email:
+        "contactanos@locreamosdigital.cl",
 
-        pending:
-          "https://locreamosdigital.cl/MenuPagoTarjeta"
+      // 🔥 URL CUANDO FLOW CONFIRMA EL PAGO
+      urlConfirmation:
+        "https://locreamosdigital.cl/webhook",
 
-      },
-
-      auto_return: "approved"
+      // 🔥 URL DONDE REGRESA EL CLIENTE
+      urlReturn:
+        "https://locreamosdigital.cl/pagoExitoso"
 
     };
 
+    /* 🔐 ORDENAR PARAMETROS */
+    const keys =
+      Object.keys(params).sort();
+
+    let toSign = "";
+
+    keys.forEach((key) => {
+
+      toSign +=
+        key + params[key];
+
+    });
+
+    /* 🔥 FIRMA FLOW */
+    const signature =
+      crypto
+        .createHmac(
+          "sha256",
+          FLOW_SECRET_KEY
+        )
+        .update(toSign)
+        .digest("hex");
+
+    params.s = signature;
+
     console.log(
-      "📡 Enviando a MercadoPago..."
+      "📡 Enviando a Flow..."
     );
 
-    const response = await axios.post(
+    /* 🚀 CREAR PAGO */
+    const response =
+      await axios.post(
 
-      "https://api.mercadopago.com/checkout/preferences",
+        "https://www.flow.cl/api/payment/create",
 
-      paymentData,
+        null,
 
-      {
-        headers: {
-
-          Authorization:
-            `Bearer ${ACCESS_TOKEN}`,
-
-          "Content-Type":
-            "application/json"
-
+        {
+          params
         }
-      }
 
-    );
+      );
 
-    const data = response.data;
+    const data =
+      response.data;
 
     console.log(
       "✅ Link generado:",
-      data.init_point
+      data.url +
+      "?token=" +
+      data.token
     );
 
+    /* 🔥 URL FINAL */
     return res.json({
-      url: data.init_point
+
+      url:
+        data.url +
+        "?token=" +
+        data.token
+
     });
 
   } catch (error) {
 
-    console.log("❌ ERROR MP:");
+    console.log(
+      "❌ ERROR FLOW:"
+    );
 
     console.log(
       error.response?.data ||
@@ -114,26 +141,29 @@ app.post("/crear-pago", async (req, res) => {
     );
 
     return res.status(500).json({
+
       error:
         "Error real desde servidor"
+
     });
 
   }
 
 });
 
-/* 🧪 WEBHOOK (PARA FUTURO USO) */
+/* 🧪 WEBHOOK FLOW */
 app.post("/webhook", (req, res) => {
 
   console.log(
-    "📩 Notificación de MercadoPago:",
+    "📩 Confirmación Flow:",
     req.body
   );
 
   // Aquí luego podrás:
   // - validar pago aprobado
-  // - enviar WhatsApp automático
-  // - guardar pedidos
+  // - guardar pedido
+  // - imprimir cocina
+  // - enviar WhatsApp
 
   res.sendStatus(200);
 
@@ -143,12 +173,12 @@ app.post("/webhook", (req, res) => {
 app.get("/", (req, res) => {
 
   res.send(
-    "Servidor MercadoPago activo ✅"
+    "Servidor FLOW activo ✅"
   );
 
 });
 
-/* 🚀 PUERTO CORRECTO PARA RENDER */
+/* 🚀 PUERTO */
 const PORT =
   process.env.PORT || 3001;
 
