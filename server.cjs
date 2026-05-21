@@ -9,7 +9,7 @@ app.use(express.json());
 
 /* 🔐 ACCESS TOKEN (luego lo moveremos a variable de entorno) */
 const ACCESS_TOKEN =
-  "APP_USR-3840784826968925-042810-481f06ae904d7cb715b21f6b95b7c19a-3365977450";
+  "APP_USR-2854404680501961-042810-8febe35dc858b73d27aa2f2246bb5087-294479764";
 
 /* 🚀 CREAR LINK DE PAGO */
 app.post("/crear-pago", async (req, res) => {
@@ -55,13 +55,13 @@ app.post("/crear-pago", async (req, res) => {
       back_urls: {
 
         success:
-          "https://locreamosdigital.cl/pago-exitoso",
+          "https://locreamosdigital.cl/PagoExitoso.jsx",
 
         failure:
-          "https://locreamosdigital.cl/muestrapedidoscomida",
+          "https://locreamosdigital.cl/MenuPagoTarjeta",
 
         pending:
-          "https://locreamosdigital.cl/muestrapedidoscomida"
+          "https://locreamosdigital.cl/MenuPagoTarjeta"
 
       },
 
