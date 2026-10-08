@@ -12,10 +12,10 @@ app.use(express.urlencoded({ extended: true }));
 
 /* 🔐 CREDENCIALES FLOW */
 const FLOW_API_KEY =
-    "5A3C4FB1-B261-4308-B1C6-7D330D1L5B49";
+    "24F3BF84-A0B4-4DE2-AB67-500DEL2FC6D4";
 
 const FLOW_SECRET_KEY =
-    "371692b7b22234b0172022206b744e5731c66c6e";
+    "c85a63bf4fc802297fd8459d500149aa85c6a320";
 
 /* =======================================
    🚀 CREAR LINK DE PAGO FLOW
