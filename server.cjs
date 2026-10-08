@@ -81,7 +81,7 @@ app.post("/crear-pago", async (req, res) => {
                 Number(total),
 
             email:
-                "contactanos@locreamosdigital.cl",
+                "",
 
             /* 🔥 WEBHOOK */
             urlConfirmation:
@@ -89,7 +89,7 @@ app.post("/crear-pago", async (req, res) => {
 
             /* 🔥 RETORNO CLIENTE */
             urlReturn:
-                `https://locreamosdigital.cl/pagorecibido?pedido=${numeroPedido}`
+                `https://https://koikanjisushi.cl//pagorecibido?pedido=${numeroPedido}`
 
         };
 
@@ -305,7 +305,7 @@ app.get("/retorno-flow", (req, res) => {
     */
 
     res.redirect(
-        "https://locreamosdigital.cl/pagorecibido"
+        "https://koikanjisushi.cl/pagorecibido"
     );
 
 });
