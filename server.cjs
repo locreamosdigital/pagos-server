@@ -81,7 +81,7 @@ app.post("/crear-pago", async (req, res) => {
                 Number(total),
 
             email:
-                "",
+                "koikanjisushi@gmail.com",
 
             /* 🔥 WEBHOOK */
             urlConfirmation:
